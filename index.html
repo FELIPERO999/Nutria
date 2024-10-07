@@ -134,7 +134,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        var map = L.map('map').setView([0, 0], 15);
+        // Initialize map centered on Tunja, Boyacá
+        var map = L.map('map').setView([5.5350, -73.3672], 15); // Tunja coordinates
 
         var blueIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
@@ -154,8 +155,8 @@
             shadowSize: [41, 41]
         });
 
-        var initialMarker = L.marker([0, 0], {icon: redIcon});
-        var updatedMarker = L.marker([0, 0], {icon: blueIcon});
+        var initialMarker = L.marker([5.5350, -73.3672], {icon: redIcon});
+        var updatedMarker = L.marker([5.5350, -73.3672], {icon: blueIcon});
         var currentPolyline = L.polyline([], { color: 'blue' });
         var savedPolylines = [];
         var tracking = false;
@@ -198,18 +199,68 @@
                 .bindPopup('<b>Coordinates: </b>' + latitude + ', ' + longitude + '<br><b>Humidity: </b>' + hum + ' %<br><b>Temperature: </b>' + temp + ' °C<br><b>Battery: </b>' + batt + ' %<br><b>Timestamp: </b>' + date_now + ' ' + time_now)
                 .openPopup();
             updatedMarker.addTo(map);
-            map.panTo([latitude, longitude]);
+            map.setView([latitude, longitude], 15);  // Set view with updated location
         }
 
         // Start tracking
         document.getElementById('startPolylineButton').addEventListener('click', function() {
-            initialMarker.setLatLng([parseFloat(document.getElementById('latitude').textContent), parseFloat(document.getElementById('longitude').textContent)]);
-            initialMarker.bindPopup('Start Location').openPopup();
-            initialMarker.addTo(map);
+            var lat = parseFloat(document.getElementById('latitude').textContent);
+            var lon = parseFloat(document.getElementById('longitude').textContent);
+            if (!isNaN(lat) && !isNaN(lon)) {
+                initialMarker.setLatLng([lat, lon]);
+                initialMarker.bindPopup('Start Location').openPopup();
+                initialMarker.addTo(map);
 
-            tracking = true;
-            map.addLayer(currentPolyline);
+                tracking = true;
+                this.style.display = 'none';
+                document.getElementById('endTrackingButton').style.display = 'block';
+                document.getElementById('resetButton').style.display = 'block';
 
+                currentPolyline.addTo(map);  // Add current polyline to map
+                currentPolyline.addLatLng([lat, lon]);
+            } else {
+                alert("Invalid latitude or longitude");
+            }
+        });
+
+        // End tracking
+        document.getElementById('endTrackingButton').addEventListener('click', function() {
+            tracking = false;
+            map.removeLayer(currentPolyline);
+            savedPolylines.push(currentPolyline);  // Save the current polyline to history
+            var trackItem = document.createElement('li');
+            trackItem.className = 'list-group-item';
+            trackItem.textContent = 'Track saved at ' + new Date().toLocaleString();
+            document.getElementById('savedTracksList').appendChild(trackItem);
+            currentPolyline = L.polyline([], { color: 'blue' }); // Create a new polyline for the next tracking session
             this.style.display = 'none';
-            document.getElementById('endTrackingButton').style.display = 'block';
-            document.getElementById('resetButton').style.display = 'block';
+            document.getElementById('startPolylineButton').style.display = 'block';
+            document.getElementById('resetButton').style.display = 'none';
+        });
+
+        // Reset tracking
+        document.getElementById('resetButton').addEventListener('click', function() {
+            // Reset the map view and polyline
+            currentPolyline = L.polyline([], { color: 'blue' });
+            map.removeLayer(updatedMarker);
+            map.removeLayer(initialMarker);
+            this.style.display = 'none';
+            document.getElementById('startPolylineButton').style.display = 'block';
+        });
+
+        // Example data input to update the map
+        // Simulate data reception (replace this with actual data handling)
+        setInterval(() => {
+            const simulatedData = {
+                field1: (Math.random() * 180 - 90).toFixed(6), // Random latitude
+                field2: (Math.random() * 360 - 180).toFixed(6), // Random longitude
+                field3: (Math.random() * 100).toFixed(2), // Random humidity
+                field4: (Math.random() * 40).toFixed(2), // Random temperature
+                field5: (Math.random() * 100).toFixed(2), // Random battery
+                created_at: new Date().toISOString() // Current timestamp
+            };
+            updateMap(simulatedData);
+        }, 5000); // Update every 5 seconds
+    </script>
+</body>
+</html>
