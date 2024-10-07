@@ -7,9 +7,8 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Full height for map in all screen sizes */
         html, body {
             height: 100%;
             margin: 0;
@@ -17,18 +16,16 @@
         }
 
         #map {
-            height: calc(100vh - 70px); /* Full height minus navbar */
+            height: calc(100vh - 70px);
             width: 100%;
         }
 
         @media (max-width: 992px) {
-            /* For smaller screens, make the map 100% width */
             #map {
                 height: 400px;
             }
         }
 
-        /* Optional styling for the card */
         .card {
             margin-top: 20px;
         }
@@ -70,46 +67,61 @@
                         <h5 class="card-title">Last Data Received</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-borderless"> 
-                            <tbody> 
-                                <tr> 
-                                    <td>Date</td> 
-                                    <td>: <a id="time_date"></a></td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Time</td> 
-                                    <td>: <a id="time_time"></a></td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Temperature</td> 
-                                    <td>: <a id="temperature"></a> C</td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Humidity</td> 
-                                    <td>: <a id="humidity"></a> %</td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Battery</td> 
-                                    <td>: <a id="battery"></a> %</td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Latitude</td> 
-                                    <td>: <a id="latitude"></a> </td> 
-                                </tr> 
-                                <tr> 
-                                    <td>Longitude</td> 
-                                    <td>: <a id="longitude"></a></td> 
-                                </tr> 
-                            </tbody> 
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr>
+                                    <td>Date</td>
+                                    <td>: <a id="time_date"></a></td>
+                                </tr>
+                                <tr>
+                                    <td>Time</td>
+                                    <td>: <a id="time_time"></a></td>
+                                </tr>
+                                <tr>
+                                    <td>Temperature</td>
+                                    <td>: <a id="temperature"></a> C</td>
+                                </tr>
+                                <tr>
+                                    <td>Humidity</td>
+                                    <td>: <a id="humidity"></a> %</td>
+                                </tr>
+                                <tr>
+                                    <td>Battery</td>
+                                    <td>: <a id="battery"></a> %</td>
+                                </tr>
+                                <tr>
+                                    <td>Latitude</td>
+                                    <td>: <a id="latitude"></a></td>
+                                </tr>
+                                <tr>
+                                    <td>Longitude</td>
+                                    <td>: <a id="longitude"></a></td>
+                                </tr>
+                            </tbody>
                         </table>
                         <div class="row">
                             <div class="col-md-5">
                                 <button id="startPolylineButton" class="btn btn-success">Start Tracking</button>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" class="btn btn-primary" id="resetButton" style="display: none;" >Reset</button>
+                                <button type="button" class="btn btn-danger" id="endTrackingButton" style="display: none;">End Tracking</button>
+                            </div>
+                            <div class="col-md-4">
+                                <button type="button" class="btn btn-primary" id="resetButton" style="display: none;">Reset</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Section for viewing saved tracks -->
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="card-title">Saved Tracks</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul id="savedTracksList" class="list-group">
+                            <!-- Saved tracks will be listed here -->
+                        </ul>
                     </div>
                 </div>
             </div>
@@ -119,13 +131,11 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         var map = L.map('map').setView([0, 0], 15);
 
-        // Marker icons
         var blueIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -134,6 +144,7 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
+
         var redIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -143,23 +154,13 @@
             shadowSize: [41, 41]
         });
 
-        var greenIcon = new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
-
         var initialMarker = L.marker([0, 0], {icon: redIcon});
         var updatedMarker = L.marker([0, 0], {icon: blueIcon});
-        var finishMarker = L.marker([0, 0], {icon: greenIcon});
-        var polyline = L.polyline([], { color: 'blue' });
-        var startPolylineButton = document.getElementById('startPolylineButton');
-        var resetButton = document.getElementById('resetButton');
-        var stat_btn = 0;
+        var currentPolyline = L.polyline([], { color: 'blue' });
+        var savedPolylines = [];
+        var tracking = false;
 
+        // Tile layer for the map
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
@@ -189,47 +190,26 @@
             document.getElementById('humidity').textContent = hum;
             document.getElementById('battery').textContent = batt;
 
-            updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now);
-
-            if (stat_btn == 1) {
-                polyline.addLatLng([latitude, longitude]);
-                polyline.addTo(map);
+            if (tracking) {
+                currentPolyline.addLatLng([latitude, longitude]);
             }
 
+            updatedMarker.setLatLng([latitude, longitude])
+                .bindPopup('<b>Coordinates: </b>' + latitude + ', ' + longitude + '<br><b>Humidity: </b>' + hum + ' %<br><b>Temperature: </b>' + temp + ' °C<br><b>Battery: </b>' + batt + ' %<br><b>Timestamp: </b>' + date_now + ' ' + time_now)
+                .openPopup();
+            updatedMarker.addTo(map);
             map.panTo([latitude, longitude]);
         }
 
-        function updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now) {
-            updatedMarker.setLatLng([latitude, longitude])
-            .bindPopup('<b>Coordinates: </b>' + latitude + ', ' + longitude + '<br><b>Humidity: </b>' + hum + ' %<br><b>Temperature: </b>' + temp + ' °C<br><b>Battery: </b>' + batt + ' %<br><b>Timestamp: </b>' + date_now + ' ' + time_now)
-            .openPopup();
-            updatedMarker.addTo(map);
-        }
-
-        startPolylineButton.addEventListener("click", function(){
+        // Start tracking
+        document.getElementById('startPolylineButton').addEventListener('click', function() {
             initialMarker.setLatLng([parseFloat(document.getElementById('latitude').textContent), parseFloat(document.getElementById('longitude').textContent)]);
             initialMarker.bindPopup('Start Location').openPopup();
             initialMarker.addTo(map);
 
-            stat_btn = 1;
-            this.style.display = 'none';
-            resetButton.style.display = 'block';
-        });
+            tracking = true;
+            map.addLayer(currentPolyline);
 
-        resetButton.addEventListener("click", function(){
-            polyline.setLatLngs([]);
-            stat_btn = 0;
-            initialMarker.remove();
             this.style.display = 'none';
-            startPolylineButton.style.display = 'block';
-        });
-
-        setInterval(function() {
-            fetch('https://api.thingspeak.com/channels/2249315/feeds/last.json?api_key=LDBS5TAN8XSVPLZ5')
-                .then(response => response.json())
-                .then(data => updateMap(data))
-                .catch(error => console.error('Error:', error));
-        }, 3000);
-    </script>
-</body>
-</html>
+            document.getElementById('endTrackingButton').style.display = 'block';
+            document.getElementById('resetButton').style.display = 'block';
