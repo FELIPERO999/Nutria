@@ -7,27 +7,11 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
         #map {
-            height: calc(100vh - 70px);
-            width: 100%;
-        }
-
-        @media (max-width: 992px) {
-            #map {
-                height: 400px;
-            }
-        }
-
-        .card {
-            margin-top: 20px;
+            width: 100%; /* El mapa ocupará el 100% del ancho de su contenedor */
+            height: 80vh; /* Altura del mapa se adaptará a la vista */
         }
     </style>
 </head>
@@ -55,73 +39,57 @@
     <!-- Main Content -->
     <div class="container-fluid mt-4">
         <div class="row">
-            <!-- Map -->
-            <div class="col-lg-8">
+            <div class="col-lg-8 col-md-7 col-sm-12">
                 <div id="map"></div>
             </div>
-
-            <!-- Sensor Data -->
-            <div class="col-lg-4">
+            <div class="col-lg-4 col-md-5 col-sm-12">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title">Last Data Received</h5>
                     </div>
                     <div class="card-body">
-                        <table class="table table-borderless">
-                            <tbody>
-                                <tr>
-                                    <td>Date</td>
-                                    <td>: <a id="time_date"></a></td>
-                                </tr>
-                                <tr>
-                                    <td>Time</td>
-                                    <td>: <a id="time_time"></a></td>
-                                </tr>
-                                <tr>
-                                    <td>Temperature</td>
-                                    <td>: <a id="temperature"></a> C</td>
-                                </tr>
-                                <tr>
-                                    <td>Humidity</td>
-                                    <td>: <a id="humidity"></a> %</td>
-                                </tr>
-                                <tr>
-                                    <td>Battery</td>
-                                    <td>: <a id="battery"></a> %</td>
-                                </tr>
-                                <tr>
-                                    <td>Latitude</td>
-                                    <td>: <a id="latitude"></a></td>
-                                </tr>
-                                <tr>
-                                    <td>Longitude</td>
-                                    <td>: <a id="longitude"></a></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="row">
+                            <table class="table table-borderless">
+                                <tbody>
+                                    <tr>
+                                        <td style="width: 20%;">Date</td>
+                                        <td>: <span id="time_date"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Time</td>
+                                        <td>: <span id="time_time"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Temperature</td>
+                                        <td>: <span id="temperature"></span> °C</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Humidity</td>
+                                        <td>: <span id="humidity"></span> %</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Battery</td>
+                                        <td>: <span id="battery"></span> %</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Latitude</td>
+                                        <td>: <span id="latitude"></span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Longitude</td>
+                                        <td>: <span id="longitude"></span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                         <div class="row">
                             <div class="col-md-5">
                                 <button id="startPolylineButton" class="btn btn-success">Start Tracking</button>
                             </div>
                             <div class="col-md-3">
-                                <button type="button" class="btn btn-danger" id="endTrackingButton" style="display: none;">End Tracking</button>
-                            </div>
-                            <div class="col-md-4">
                                 <button type="button" class="btn btn-primary" id="resetButton" style="display: none;">Reset</button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Section for viewing saved tracks -->
-                <div class="card mt-3">
-                    <div class="card-header">
-                        <h5 class="card-title">Saved Tracks</h5>
-                    </div>
-                    <div class="card-body">
-                        <ul id="savedTracksList" class="list-group">
-                            <!-- Saved tracks will be listed here -->
-                        </ul>
                     </div>
                 </div>
             </div>
@@ -130,13 +98,13 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
     <script>
-        // Initialize map centered on Tunja, Boyacá
-        var map = L.map('map').setView([5.5350, -73.3672], 15); // Tunja coordinates
-
+        var map = L.map('map').setView([0, 0], 15);
+        
+        // Define los íconos de los marcadores
         var blueIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -145,7 +113,6 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
-
         var redIcon = new L.Icon({
             iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
             shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
@@ -154,19 +121,30 @@
             popupAnchor: [1, -34],
             shadowSize: [41, 41]
         });
+        var greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
 
-        var initialMarker = L.marker([5.5350, -73.3672], {icon: redIcon});
-        var updatedMarker = L.marker([5.5350, -73.3672], {icon: blueIcon});
-        var currentPolyline = L.polyline([], { color: 'blue' });
-        var savedPolylines = [];
-        var tracking = false;
-
-        // Tile layer for the map
+        var initialMarker = L.marker([0, 0], { icon: redIcon });
+        var updatedMarker = L.marker([0, 0], { icon: blueIcon });
+        var finishMarker = L.marker([0, 0], { icon: greenIcon });
+        var polyline = L.polyline([], { color: 'blue' });
+        var startPolylineButton = document.getElementById('startPolylineButton');
+        var resetButton = document.getElementById('resetButton');
+        var isPolylineStarted = false;
+        var stat_btn = 0;
+        
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '© OpenStreetMap contributors'
         }).addTo(map);
 
         function updateMap(data) {
+            // Extraer latitud y longitud de la respuesta de la API
             var latitude = parseFloat(data.field1);
             var longitude = parseFloat(data.field2);
             var hum  = parseFloat(data.field3);
@@ -174,93 +152,85 @@
             var batt = parseFloat(data.field5);
             var timestamp = data.created_at;
 
-            hum  = hum.toFixed(2);
-            temp = temp.toFixed(2);
-            batt = batt.toFixed(2);
+            // Formatear datos
+            var date_ = timestamp.split('T'), 
+                date_now = date_[0], time_z = date_[1];
+            var time_ = time_z.split('+'), time_now = time_[0];
 
-            var date_ = timestamp.split('T'),
-                date_now = date_[0],
-                time_ = date_[1].split('+'),
-                time_now = time_[0];
-
+            // Actualizar los elementos en la interfaz
             document.getElementById('latitude').textContent = latitude.toFixed(6);
             document.getElementById('longitude').textContent = longitude.toFixed(6);
             document.getElementById('time_date').textContent = date_now;
             document.getElementById('time_time').textContent = time_now;
-            document.getElementById('temperature').textContent = temp;
-            document.getElementById('humidity').textContent = hum;
-            document.getElementById('battery').textContent = batt;
+            document.getElementById('temperature').textContent = temp.toFixed(2);
+            document.getElementById('humidity').textContent = hum.toFixed(2);
+            document.getElementById('battery').textContent = batt.toFixed(2);
 
-            if (tracking) {
-                currentPolyline.addLatLng([latitude, longitude]);
+            // Actualizar marcadores
+            updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now);
+            if (stat_btn === 1) {
+                // Actualizar la polilínea
+                polyline.addLatLng([latitude, longitude]);
+                polyline.addTo(map);
             }
 
-            updatedMarker.setLatLng([latitude, longitude])
-                .bindPopup('<b>Coordinates: </b>' + latitude + ', ' + longitude + '<br><b>Humidity: </b>' + hum + ' %<br><b>Temperature: </b>' + temp + ' °C<br><b>Battery: </b>' + batt + ' %<br><b>Timestamp: </b>' + date_now + ' ' + time_now)
-                .openPopup();
-            updatedMarker.addTo(map);
-            map.setView([latitude, longitude], 15);  // Set view with updated location
+            // Centrar el mapa en la nueva ubicación
+            map.setView([latitude, longitude], 15);
         }
 
-        // Start tracking
-        document.getElementById('startPolylineButton').addEventListener('click', function() {
-            var lat = parseFloat(document.getElementById('latitude').textContent);
-            var lon = parseFloat(document.getElementById('longitude').textContent);
-            if (!isNaN(lat) && !isNaN(lon)) {
-                initialMarker.setLatLng([lat, lon]);
-                initialMarker.bindPopup('Start Location').openPopup();
-                initialMarker.addTo(map);
+        function updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now) {
+            updatedMarker.setLatLng([latitude, longitude]);
+            updatedMarker.bindPopup("Last Data: <br/> Date: " + date_now + "<br/> Time: " + time_now + "<br/> Temperature: " + temp.toFixed(2) + "°C<br/> Humidity: " + hum.toFixed(2) + "%<br/> Battery: " + batt.toFixed(2) + "%").openPopup();
+            updatedMarker.addTo(map);
+            updatedMarker.bringToFront();
+            initialMarker.remove();
+        }
 
-                tracking = true;
-                this.style.display = 'none';
-                document.getElementById('endTrackingButton').style.display = 'block';
-                document.getElementById('resetButton').style.display = 'block';
-
-                currentPolyline.addTo(map);  // Add current polyline to map
-                currentPolyline.addLatLng([lat, lon]);
+        startPolylineButton.addEventListener('click', function() {
+            if (isPolylineStarted) {
+                // Detener seguimiento
+                resetButton.style.display = "block";
+                isPolylineStarted = false;
+                startPolylineButton.textContent = "Start Tracking";
+                stat_btn = 0;
+                finishMarker.setLatLng(updatedMarker.getLatLng());
+                finishMarker.addTo(map);
+                polyline.addTo(map);
             } else {
-                alert("Invalid latitude or longitude");
+                // Iniciar seguimiento
+                resetButton.style.display = "none";
+                isPolylineStarted = true;
+                startPolylineButton.textContent = "Stop Tracking";
+                stat_btn = 1;
+                polyline = L.polyline([], { color: 'blue' }).addTo(map); // Crear nueva polilínea
             }
         });
 
-        // End tracking
-        document.getElementById('endTrackingButton').addEventListener('click', function() {
-            tracking = false;
-            map.removeLayer(currentPolyline);
-            savedPolylines.push(currentPolyline);  // Save the current polyline to history
-            var trackItem = document.createElement('li');
-            trackItem.className = 'list-group-item';
-            trackItem.textContent = 'Track saved at ' + new Date().toLocaleString();
-            document.getElementById('savedTracksList').appendChild(trackItem);
-            currentPolyline = L.polyline([], { color: 'blue' }); // Create a new polyline for the next tracking session
-            this.style.display = 'none';
-            document.getElementById('startPolylineButton').style.display = 'block';
-            document.getElementById('resetButton').style.display = 'none';
+        resetButton.addEventListener('click', function() {
+            location.reload();
         });
 
-        // Reset tracking
-        document.getElementById('resetButton').addEventListener('click', function() {
-            // Reset the map view and polyline
-            currentPolyline = L.polyline([], { color: 'blue' });
-            map.removeLayer(updatedMarker);
-            map.removeLayer(initialMarker);
-            this.style.display = 'none';
-            document.getElementById('startPolylineButton').style.display = 'block';
-        });
-
-        // Example data input to update the map
-        // Simulate data reception (replace this with actual data handling)
-        setInterval(() => {
-            const simulatedData = {
-                field1: (Math.random() * 180 - 90).toFixed(6), // Random latitude
-                field2: (Math.random() * 360 - 180).toFixed(6), // Random longitude
-                field3: (Math.random() * 100).toFixed(2), // Random humidity
-                field4: (Math.random() * 40).toFixed(2), // Random temperature
-                field5: (Math.random() * 100).toFixed(2), // Random battery
-                created_at: new Date().toISOString() // Current timestamp
+        // Función para obtener datos de ThingSpeak
+        function fetchData() {
+            var request = new XMLHttpRequest();
+            request.open('GET', 'https://api.thingspeak.com/channels/123456/feeds/last.json?api_key=YOUR_API_KEY', true);
+            request.onload = function() {
+                if (this.status >= 200 && this.status < 400) {
+                    var data = JSON.parse(this.response);
+                    updateMap(data);
+                } else {
+                    console.error('Error in API response');
+                }
             };
-            updateMap(simulatedData);
-        }, 5000); // Update every 5 seconds
+            request.onerror = function() {
+                console.error('Connection error');
+            };
+            request.send();
+        }
+
+        // Llama a fetchData cada 15 segundos
+        setInterval(fetchData, 15000);
+        fetchData(); // Primera llamada
     </script>
 </body>
 </html>
