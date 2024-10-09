@@ -10,8 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <style>
         #map {
-            width: 100%; /* El mapa ocupará el 100% del ancho de su contenedor */
-            height: 80vh; /* Altura del mapa se adaptará a la vista */
+            width: 100%;
+            height: 80vh;
         }
     </style>
 </head>
@@ -98,9 +98,10 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Bootstrap JS (optional) -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
+
     <script>
         var map = L.map('map').setView([0, 0], 15);
         
@@ -179,41 +180,40 @@
         }
 
         function updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now) {
-            updatedMarker.setLatLng([latitude, longitude]);
-            updatedMarker.bindPopup("Last Data: <br/> Date: " + date_now + "<br/> Time: " + time_now + "<br/> Temperature: " + temp.toFixed(2) + "°C<br/> Humidity: " + hum.toFixed(2) + "%<br/> Battery: " + batt.toFixed(2) + "%").openPopup();
-            updatedMarker.addTo(map);
-            updatedMarker.bringToFront();
-            initialMarker.remove();
+            if (stat_btn === 0) {
+                initialMarker.setLatLng([latitude, longitude]);
+                initialMarker.addTo(map);
+                initialMarker.bindPopup("Inicio<br>Temperatura: " + temp + "°C<br>Humedad: " + hum + "%<br>Batería: " + batt + "%<br>Hora: " + time_now + "<br>Fecha: " + date_now);
+            } else if (stat_btn === 1) {
+                updatedMarker.setLatLng([latitude, longitude]);
+                updatedMarker.addTo(map);
+                updatedMarker.bindPopup("Actual<br>Temperatura: " + temp + "°C<br>Humedad: " + hum + "%<br>Batería: " + batt + "%<br>Hora: " + time_now + "<br>Fecha: " + date_now);
+            }
         }
 
-        startPolylineButton.addEventListener('click', function() {
-            if (isPolylineStarted) {
-                // Detener seguimiento
-                resetButton.style.display = "block";
-                isPolylineStarted = false;
-                startPolylineButton.textContent = "Start Tracking";
-                stat_btn = 0;
-                finishMarker.setLatLng(updatedMarker.getLatLng());
-                finishMarker.addTo(map);
-                polyline.addTo(map);
-            } else {
-                // Iniciar seguimiento
-                resetButton.style.display = "none";
-                isPolylineStarted = true;
-                startPolylineButton.textContent = "Stop Tracking";
-                stat_btn = 1;
-                polyline = L.polyline([], { color: 'blue' }).addTo(map); // Crear nueva polilínea
-            }
+        startPolylineButton.addEventListener('click', function () {
+            stat_btn = 1;
+            startPolylineButton.disabled = true;
+            resetButton.style.display = "inline";
         });
 
-        resetButton.addEventListener('click', function() {
-            location.reload();
+        resetButton.addEventListener('click', function () {
+            stat_btn = 0;
+            polyline.setLatLngs([]); // Limpiar la polilínea
+            map.removeLayer(updatedMarker); // Eliminar el marcador actualizado
+            map.removeLayer(initialMarker); // Eliminar el marcador inicial
+            map.removeLayer(finishMarker); // Eliminar el marcador final
+            startPolylineButton.disabled = false;
+            resetButton.style.display = "none";
         });
 
         // Función para obtener datos de ThingSpeak
         function fetchData() {
             var request = new XMLHttpRequest();
-            request.open('GET', 'https://api.thingspeak.com/channels/123456/feeds/last.json?api_key=YOUR_API_KEY', true);
+            var channelID = 2680232;
+            var readAPIKey = "3H3I9SG5PVRMZ9LG"; // La clave de lectura real
+            
+            request.open('GET', 'https://api.thingspeak.com/channels/' + channelID + '/feeds/last.json?api_key=' + readAPIKey, true);
             request.onload = function() {
                 if (this.status >= 200 && this.status < 400) {
                     var data = JSON.parse(this.response);
@@ -234,3 +234,4 @@
     </script>
 </body>
 </html>
+
