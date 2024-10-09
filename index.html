@@ -10,18 +10,11 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <style>
         #map {
-            width: 100%;
-            height: 60vh;
+            width: 1920px;  /* Ancho del mapa */
+            height: 1080px; /* Alto del mapa */
         }
-        .container-fluid {
+        #controls {
             margin-top: 20px;
-        }
-        .card-body {
-            padding: 20px;
-        }
-        .table-responsive {
-            max-height: 400px;
-            overflow-y: auto;
         }
     </style>
 </head>
@@ -47,62 +40,16 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid">
-        <div class="row">
-            <!-- Mapa -->
-            <div class="col-lg-8 col-md-7 col-sm-12">
+    <div class="container-fluid mt-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
                 <div id="map"></div>
-            </div>
-            <!-- Tabla de datos -->
-            <div class="col-lg-4 col-md-5 col-sm-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title">Last Data Received</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-borderless">
-                                <tbody>
-                                    <tr>
-                                        <td style="width: 20%;">Date</td>
-                                        <td>: <span id="time_date">-</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Time</td>
-                                        <td>: <span id="time_time">-</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Temperature</td>
-                                        <td>: <span id="temperature">-</span> °C</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Humidity</td>
-                                        <td>: <span id="humidity">-</span> %</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Battery</td>
-                                        <td>: <span id="battery">-</span> %</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Latitude</td>
-                                        <td>: <span id="latitude">-</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>Longitude</td>
-                                        <td>: <span id="longitude">-</span></td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-5">
-                                <button id="startPolylineButton" class="btn btn-success">Start Tracking</button>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-primary" id="resetButton" style="display: none;">Reset</button>
-                            </div>
-                        </div>
-                    </div>
+                <div id="controls" class="d-flex justify-content-between">
+                    <button id="startBtn" class="btn btn-success">Iniciar Recorrido</button>
+                    <button id="stopBtn" class="btn btn-danger" disabled>Terminar Recorrido</button>
+                    <select id="recorridosSelect" class="form-select w-25">
+                        <option value="">Seleccionar Recorrido</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -110,139 +57,135 @@
 
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <!-- Bootstrap JS -->
+    <!-- Bootstrap JS (optional) -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js" integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js" integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+" crossorigin="anonymous"></script>
-
+    
+    <!-- Custom JavaScript -->
     <script>
-        var map = L.map('map').setView([0, 0], 15);
-        
-        // Define los íconos de los marcadores
-        var blueIcon = new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
-        var redIcon = new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
-        var greenIcon = new L.Icon({
-            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-            shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-            iconSize: [25, 41],
-            iconAnchor: [12, 41],
-            popupAnchor: [1, -34],
-            shadowSize: [41, 41]
-        });
-
-        var initialMarker = L.marker([0, 0], { icon: redIcon });
-        var updatedMarker = L.marker([0, 0], { icon: blueIcon });
-        var finishMarker = L.marker([0, 0], { icon: greenIcon });
-        var polyline = L.polyline([], { color: 'blue' });
-        var startPolylineButton = document.getElementById('startPolylineButton');
-        var resetButton = document.getElementById('resetButton');
-        var isPolylineStarted = false;
-        var stat_btn = 0;
-        
+        // Inicializar el mapa con un mayor nivel de zoom
+        var map = L.map('map').setView([0, 0], 18); // Cambia el zoom inicial a 18
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 22 // Permitir hacer zoom hasta el nivel 22
         }).addTo(map);
 
-        function updateMap(data) {
-            // Extraer latitud y longitud de la respuesta de la API
-            var latitude = parseFloat(data.field1);
-            var longitude = parseFloat(data.field2);
-            var hum  = parseFloat(data.field3);
-            var temp = parseFloat(data.field4);
-            var batt = parseFloat(data.field5);
-            var timestamp = data.created_at;
+        var isTracking = false;
+        var trackCoordinates = [];
+        var polyline;  // Polilínea para trazar el recorrido
+        var recorridos = [];  // Lista de recorridos anteriores
+        var recorridoId = 0;  // ID para cada recorrido guardado
 
-            // Formatear datos
-            var date_ = timestamp.split('T'), 
-                date_now = date_[0], time_z = date_[1];
-            var time_ = time_z.split('+'), time_now = time_[0];
+        // Botones de control
+        const startBtn = document.getElementById('startBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const recorridosSelect = document.getElementById('recorridosSelect');
 
-            // Actualizar los elementos en la interfaz
-            document.getElementById('latitude').textContent = latitude.toFixed(6);
-            document.getElementById('longitude').textContent = longitude.toFixed(6);
-            document.getElementById('time_date').textContent = date_now;
-            document.getElementById('time_time').textContent = time_now;
-            document.getElementById('temperature').textContent = temp.toFixed(2);
-            document.getElementById('humidity').textContent = hum.toFixed(2);
-            document.getElementById('battery').textContent = batt.toFixed(2);
-
-            // Actualizar el marcador y la polilínea
-            updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now);
-
-            if (stat_btn === 1) {
-                polyline.addLatLng([latitude, longitude]);
-                polyline.addTo(map);
-            }
-
-            map.setView([latitude, longitude], 15);
-        }
-
-        function updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now) {
-            if (stat_btn === 0) {
-                initialMarker.setLatLng([latitude, longitude]);
-                initialMarker.addTo(map);
-                initialMarker.bindPopup("Inicio<br>Temperatura: " + temp + "°C<br>Humedad: " + hum + "%<br>Batería: " + batt + "%<br>Hora: " + time_now + "<br>Fecha: " + date_now);
-            } else if (stat_btn === 1) {
-                updatedMarker.setLatLng([latitude, longitude]);
-                updatedMarker.addTo(map);
-                updatedMarker.bindPopup("Actual<br>Temperatura: " + temp + "°C<br>Humedad: " + hum + "%<br>Batería: " + batt + "%<br>Hora: " + time_now + "<br>Fecha: " + date_now);
-            }
-        }
-
-        startPolylineButton.addEventListener('click', function () {
-            stat_btn = 1;
-            startPolylineButton.disabled = true;
-            resetButton.style.display = "inline";
+        // Función para iniciar el seguimiento
+        startBtn.addEventListener('click', () => {
+            isTracking = true;
+            trackCoordinates = [];  // Reiniciar el array de coordenadas
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            console.log("Recorrido Iniciado");
         });
 
-        resetButton.addEventListener('click', function () {
-            stat_btn = 0;
-            polyline.setLatLngs([]); 
-            map.removeLayer(updatedMarker);
-            map.removeLayer(initialMarker);
-            map.removeLayer(finishMarker);
-            startPolylineButton.disabled = false;
-            resetButton.style.display = "none";
+        // Función para detener el seguimiento y guardar el recorrido
+        stopBtn.addEventListener('click', () => {
+            isTracking = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+
+            if (trackCoordinates.length > 0) {
+                guardarRecorrido(trackCoordinates);  // Guardar recorrido
+            }
+
+            // Eliminar la polilínea del mapa
+            if (polyline) {
+                map.removeLayer(polyline);
+            }
+
+            console.log("Recorrido Terminado");
         });
 
-        // Función para obtener datos de ThingSpeak
-        function fetchData() {
-            var request = new XMLHttpRequest();
-            var channelID = 2680232;
-            var readAPIKey = "3H3I9SG5PVRMZ9LG"; // La clave de lectura real
-            
-            request.open('GET', 'https://api.thingspeak.com/channels/' + channelID + '/feeds/last.json?api_key=' + readAPIKey, true);
-            request.onload = function() {
-                if (this.status >= 200 && this.status < 400) {
-                    var data = JSON.parse(this.response);
-                    updateMap(data);
-                } else {
-                    console.error('Error in API response');
+        // Función para guardar el recorrido en la lista de recorridos
+        function guardarRecorrido(coordenadas) {
+            recorridoId++;
+            recorridos.push({
+                id: recorridoId,
+                coords: coordenadas
+            });
+
+            // Añadir opción al selector de recorridos
+            const option = document.createElement('option');
+            option.value = recorridoId;
+            option.text = `Recorrido ${recorridoId}`;
+            recorridosSelect.appendChild(option);
+
+            console.log("Recorrido Guardado:", coordenadas);
+        }
+
+        // Función para visualizar un recorrido seleccionado
+        recorridosSelect.addEventListener('change', (event) => {
+            const recorridoSeleccionadoId = parseInt(event.target.value);
+            const recorridoSeleccionado = recorridos.find(r => r.id === recorridoSeleccionadoId);
+
+            if (recorridoSeleccionado) {
+                // Eliminar cualquier polilínea actual
+                if (polyline) {
+                    map.removeLayer(polyline);
                 }
-            };
-            request.onerror = function() {
-                console.error('Connection error');
-            };
-            request.send();
+
+                // Dibujar el recorrido seleccionado
+                polyline = L.polyline(recorridoSeleccionado.coords, { color: 'blue' }).addTo(map);
+                map.fitBounds(polyline.getBounds());
+
+                console.log("Visualizando Recorrido:", recorridoSeleccionadoId);
+            }
+        });
+
+        // Función para obtener datos de la API
+        function fetchData() {
+            var apiUrl = 'https://api.thingspeak.com/channels/2680232/feeds/last.json?api_key=8DO3OKCMKLZV7ZXU';
+
+            fetch(apiUrl)
+            .then(response => response.json())
+            .then(data => {
+                updateMarker(data);
+            })
+            .catch(error => console.error('Error al obtener datos:', error));
         }
 
-        setInterval(fetchData, 15000); // Llama a fetchData cada 15 segundos
-        fetchData(); // Primera llamada
+        // Función para actualizar el marcador y dibujar la ruta
+        function updateMarker(location) {
+            var latLng = [parseFloat(location.field1), parseFloat(location.field2)];
+
+            // Si el seguimiento está activo, almacenar las coordenadas y dibujar la línea
+            if (isTracking) {
+                trackCoordinates.push(latLng);  // Guardar la posición actual
+                if (polyline) {
+                    map.removeLayer(polyline);  // Eliminar la línea previa si existe
+                }
+                polyline = L.polyline(trackCoordinates, { color: 'blue' }).addTo(map);  // Dibujar la nueva línea
+            }
+
+            // Remover el marcador existente
+            map.eachLayer(function(layer) {
+                if (layer instanceof L.Marker) {
+                    map.removeLayer(layer);
+                }
+            });
+
+            // Añadir un nuevo marcador basado en la respuesta del API
+            var marker = L.marker(latLng).addTo(map);
+            map.setView(latLng, map.getZoom());
+        }
+
+        // Llamar a fetchData cuando se cargue la página
+        fetchData();
+
+        // Obtener datos cada 10 segundos
+        setInterval(fetchData, 10000);
     </script>
 </body>
 </html>
-
-
