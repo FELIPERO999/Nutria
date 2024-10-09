@@ -11,7 +11,17 @@
     <style>
         #map {
             width: 100%;
-            height: 80vh;
+            height: 60vh;
+        }
+        .container-fluid {
+            margin-top: 20px;
+        }
+        .card-body {
+            padding: 20px;
+        }
+        .table-responsive {
+            max-height: 400px;
+            overflow-y: auto;
         }
     </style>
 </head>
@@ -37,47 +47,49 @@
     </nav>
 
     <!-- Main Content -->
-    <div class="container-fluid mt-4">
+    <div class="container-fluid">
         <div class="row">
+            <!-- Mapa -->
             <div class="col-lg-8 col-md-7 col-sm-12">
                 <div id="map"></div>
             </div>
+            <!-- Tabla de datos -->
             <div class="col-lg-4 col-md-5 col-sm-12">
                 <div class="card">
                     <div class="card-header">
                         <h5 class="card-title">Last Data Received</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row">
+                        <div class="table-responsive">
                             <table class="table table-borderless">
                                 <tbody>
                                     <tr>
                                         <td style="width: 20%;">Date</td>
-                                        <td>: <span id="time_date"></span></td>
+                                        <td>: <span id="time_date">-</span></td>
                                     </tr>
                                     <tr>
                                         <td>Time</td>
-                                        <td>: <span id="time_time"></span></td>
+                                        <td>: <span id="time_time">-</span></td>
                                     </tr>
                                     <tr>
                                         <td>Temperature</td>
-                                        <td>: <span id="temperature"></span> °C</td>
+                                        <td>: <span id="temperature">-</span> °C</td>
                                     </tr>
                                     <tr>
                                         <td>Humidity</td>
-                                        <td>: <span id="humidity"></span> %</td>
+                                        <td>: <span id="humidity">-</span> %</td>
                                     </tr>
                                     <tr>
                                         <td>Battery</td>
-                                        <td>: <span id="battery"></span> %</td>
+                                        <td>: <span id="battery">-</span> %</td>
                                     </tr>
                                     <tr>
                                         <td>Latitude</td>
-                                        <td>: <span id="latitude"></span></td>
+                                        <td>: <span id="latitude">-</span></td>
                                     </tr>
                                     <tr>
                                         <td>Longitude</td>
-                                        <td>: <span id="longitude"></span></td>
+                                        <td>: <span id="longitude">-</span></td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -167,15 +179,14 @@
             document.getElementById('humidity').textContent = hum.toFixed(2);
             document.getElementById('battery').textContent = batt.toFixed(2);
 
-            // Actualizar marcadores
+            // Actualizar el marcador y la polilínea
             updateMarker(hum, temp, batt, latitude, longitude, date_now, time_now);
+
             if (stat_btn === 1) {
-                // Actualizar la polilínea
                 polyline.addLatLng([latitude, longitude]);
                 polyline.addTo(map);
             }
 
-            // Centrar el mapa en la nueva ubicación
             map.setView([latitude, longitude], 15);
         }
 
@@ -199,10 +210,10 @@
 
         resetButton.addEventListener('click', function () {
             stat_btn = 0;
-            polyline.setLatLngs([]); // Limpiar la polilínea
-            map.removeLayer(updatedMarker); // Eliminar el marcador actualizado
-            map.removeLayer(initialMarker); // Eliminar el marcador inicial
-            map.removeLayer(finishMarker); // Eliminar el marcador final
+            polyline.setLatLngs([]); 
+            map.removeLayer(updatedMarker);
+            map.removeLayer(initialMarker);
+            map.removeLayer(finishMarker);
             startPolylineButton.disabled = false;
             resetButton.style.display = "none";
         });
@@ -228,10 +239,10 @@
             request.send();
         }
 
-        // Llama a fetchData cada 15 segundos
-        setInterval(fetchData, 15000);
+        setInterval(fetchData, 15000); // Llama a fetchData cada 15 segundos
         fetchData(); // Primera llamada
     </script>
 </body>
 </html>
+
 
